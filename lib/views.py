@@ -14,21 +14,23 @@ class IndexView(View):
     async def post(self) -> Response:
         try:
             form = await self.request.post()
+            min_accuracy = form.get("number", 0) / 100
             image = open_image(form["image"].file)
             draw = PolygonDrawer(image)
             model = self.request.app["model"]
             words = []
             for coords, word, accuracy in model.readtext(image):
-                draw.highlight_word(coords, word)
-                cropped_img = draw.crop(coords)
-                cropped_img_b64 = image_to_img_src(cropped_img)
-                words.append(
-                    {
-                        "image": cropped_img_b64,
-                        "word": word,
-                        "accuracy": accuracy,
-                    }
-                )
+                if accuracy >= min_accuracy:
+                    draw.highlight_word(coords, word)
+                    cropped_img = draw.crop(coords)
+                    cropped_img_b64 = image_to_img_src(cropped_img)
+                    words.append(
+                        {
+                            "image": cropped_img_b64,
+                            "word": word,
+                            "accuracy": accuracy,
+                        }
+                    )
             image_b64 = image_to_img_src(draw.get_highlighted_image())
             ctx = {"image": image_b64, "words": words}
             return render_template("index.html", self.request, ctx)
