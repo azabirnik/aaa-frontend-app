@@ -33,5 +33,6 @@ class IndexView(View):
             ctx = {"image": image_b64, "words": words}
             return render_template("index.html", self.request, ctx)
         except Exception as err:
-            ctx = {"error": str(err)}
+            error_type = str(type(err)).split("'")[1]
+            ctx = {"error": str(err), "error_type": error_type}
             return render_template("index.html", self.request, ctx)
