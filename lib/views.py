@@ -14,7 +14,7 @@ class IndexView(View):
     async def post(self) -> Response:
         try:
             form = await self.request.post()
-            min_accuracy = form.get("number", 0) / 100
+            min_accuracy = 0
             image = open_image(form["image"].file)
             draw = PolygonDrawer(image)
             model = self.request.app["model"]
